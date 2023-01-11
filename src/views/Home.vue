@@ -6,17 +6,21 @@ export default {
   data() {
     return {
       contract: '',
-      account3:'',
+      account3: '',
       contract1: '',
       provider: '',
       greet: '',
       value: '',
       signer: '',
       contractAddress: '',
-      account:[],
+      account: [],
       startelection: '',
       addcandidate: '',
       vote: '',
+      candidateinfo1: {
+        name: '',
+        votes: ''
+      },
       authorizevoter: '',
       candidateinfo: '',
       candidate: '',
@@ -24,7 +28,12 @@ export default {
       totalvotes: '',
       owner: '',
       gettotalvotes: '',
-      voters: '',
+      voter_address: '',
+      voters1: {
+        authorised:'',
+        whom:'',
+        voted:''
+      },
       getnumcandidates: '',
 
 
@@ -36,7 +45,7 @@ export default {
       console.log(`${this.name} ${this.email}`)
     },
     async loadproviders() {
-      let contractAddress = "0xB0fC1428EAF94cb22414550372d5B34386F59665";
+      let contractAddress = "0x4AfAedaC5C868239c2f68f337737696897914100";
       let url = "http://localhost:8545";
       let provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
       // const signer = provider.getSigner()
@@ -79,13 +88,13 @@ export default {
 
     async loader() {
       try {
-        let contractAddress = "0xb9aE3528661BceD23aBC7CEF7F46FE354B47Eca0";
+        let contractAddress = "0x91851eAd01394a55A3FdD4597b4ab9DaffE4056a";
         let url = "http://localhost:8545";
         let provider = new ethers.providers.JsonRpcProvider(url);
-        let account=await provider.listAccounts()
-        this.account=account
+        let account = await provider.listAccounts()
+        this.account = account
         // const signer = provider.getSigner()
-        
+
         console.log('signer')
         // console.log(signer3)
         let signer = provider.getSigner()
@@ -106,7 +115,7 @@ export default {
         this.contractAddress = contractAddress;
         console.log(`contract Address ${this.contract}`)
         console.log(`contract signer ${this.signer}`)
-     
+
         let get = await contract.electionName()
         console.log(get)
       } catch (e) {
@@ -161,31 +170,36 @@ export default {
         // this.account=account
         // const signer = provider.getSigner()
         // let signer1 = this.provider.getSigner(this.account[2])
-        let signer3=new ethers.providers.JsonRpcProvider("http://localhost:8545").getSigner( this.account[4] )
-        let contract2 = new ethers.Contract(
-          this.contractAddress,
-          ABI,
-          signer3
-        );
-        
-        
-
-        console.log(this.vote)
-        let response = await contract2.vote(this.vote)
-        console.log(`success from vote ${response}`)
+        if (this.voter_address != '' && this.vote != '') {
+          let signer3 = new ethers.providers.JsonRpcProvider("http://localhost:8545").getSigner(this.voter_address)
+          let contract2 = new ethers.Contract(
+            this.contractAddress,
+            ABI,
+            signer3
+          );
+          console.log(this.vote)
+          let response = await contract2.vote(this.vote)
+          console.log(`success from vote ${response}`)
+          this.voter_address = ''
+        }
+        else {
+          alert('Voter and voter address fields are mandatory')
+        }
       } catch (e) {
         console.log(e)
       }
     },
 
-    // async candidateInfo1(){
-    //   try{
-    //     let response = await this.contract1.candidateInfo(this.candidateinfo)
-    //     console.log(`success ${response}`)
-    //   }catch(e){
-    //     console.log(e)
-    //   }
-    // },
+    async candidateInfo1() {
+      try {
+        let response = await this.contract1.candidateInfo(this.candidateinfo)
+        console.log(`success ${response.name}`)
+        this.candidateinfo1.name = response.name
+        this.candidateinfo1.votes = response.numVotes
+      } catch (e) {
+        console.log(e)
+      }
+    },
 
     // async candidate1(){
     //   try{
@@ -196,6 +210,14 @@ export default {
     //   }
     // },
 
+    async addCandidate1() {
+      try {
+        let response = await this.contract1.addCandidate(this.addcandidate)
+        console.log(`success ${response}`)
+      } catch (e) {
+        console.log(e)
+      }
+    },
 
     async electionName1() {
       try {
@@ -208,25 +230,25 @@ export default {
       }
     },
 
-    // async getTotalVotes1(){
-    //   try{
-    //     let response = await this.contract.getTotalVotes()
-    //     console.log(`success ${response.toString()}`)
-    //     this.totalvotes=response.toString()
-    //   }catch(e){
-    //     console.log(e)
-    //   }
-    // },
+    async getTotalVotes1() {
+      try {
+        let response = await this.contract.getTotalVotes()
+        console.log(`success ${response.toString()}`)
+        this.totalvotes = response.toString()
+      } catch (e) {
+        console.log(e)
+      }
+    },
 
-    // async getNumCandidates1(){
-    //   try{
-    //     let response = await this.contract.getNumCandidates()
-    //     console.log(`success ${response.toString()}`)
-    //     this.getnumcandidates=response.toString()
-    //   }catch(e){
-    //     console.log(e)
-    //   }
-    // },
+    async getNumCandidates1() {
+      try {
+        let response = await this.contract.getNumCandidates()
+        console.log(`success ${response.toString()}`)
+        this.getnumcandidates = response.toString()
+      } catch (e) {
+        console.log(e)
+      }
+    },
 
     async owner1() {
       try {
@@ -251,11 +273,15 @@ export default {
     async Voters1() {
       try {
         let response = await this.contract1.voters(this.voters)
-        console.log(response)
-        console.log(response.authorised.toString())
-        console.log(response.name.toString())
-        console.log(response.whom.toString())
-        console.log(response.voted.toString())
+        console.log(response.authorised )
+        this.voters1.authorised=response.authorised
+        this.voters1.whom=response.whom
+        this.voters1.voted=response.voted
+        
+        // console.log(response.authorised.toString())
+        // console.log(response.name.toString())
+        // console.log(response.whom.toString())
+        // console.log(response.voted.toString())
 
       } catch (e) {
         console.log(e)
@@ -311,25 +337,41 @@ export default {
     </div>
 
     <div class="box">
+      <label> VOTE ADDRESS</label>
+      <input type="text" v-model="this.voter_address" />
       <label> VOTE </label>
       <input type="text" v-model="this.vote" />
       <button @click="this.Vote1">click</button>
     </div>
-    <!-- <div class="box">
+    <div class="box">
       <label> ADD CANDIDATE </label>
       <input type="text" v-model="this.addcandidate" />
       <button @click="this.addCandidate1">click</button>
     </div>
 
-    
-
-    
+    <div class="box">
+      <label> GET TOTAL VOTE {{ this.totalvotes }}</label>
+      <button @click="this.getTotalVotes1">click</button>
+    </div>
 
     <div class="box">
-      <label> CANDIDATE INFO </label>
+      <label> GET NUMBER OF CANDIDATE {{ this.getnumcandidates }}</label>
+      <button @click="this.getNumCandidates1">click</button>
+    </div>
+
+    <div class="box">
+      <label> CANDIDATE INFO {{ this.candidateinfo1.name }} {{ this.candidateinfo1.votes }}</label>
       <input type="text" v-model="this.candidateinfo" />
       <button @click="this.candidateInfo1">click</button>
     </div>
+
+    <!-- 
+
+    
+
+    
+
+   
 
     <div class="box">
       <label> CANDIDATE </label>
@@ -339,10 +381,7 @@ export default {
 
     
 
-    <div class="box">
-      <label> GET TOTAL VOTE {{ this.totalvotes }}</label>
-      <button @click="this.getTotalVotes1">click</button>
-    </div>
+    
 
     
 
